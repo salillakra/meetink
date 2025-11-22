@@ -21,7 +21,6 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:3001", 
         "https://meetink.vercel.app",
-        "https://*.vercel.app"  # Allow all Vercel preview deployments
     ],
     allow_credentials=True,
     allow_methods=["*"],
