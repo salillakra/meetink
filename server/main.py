@@ -17,7 +17,12 @@ app = FastAPI(lifespan=lifespan)
 # Add CORS middleware for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://meetink.vercel.app"], 
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001", 
+        "https://meetink.vercel.app",
+        "https://*.vercel.app"  # Allow all Vercel preview deployments
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,7 +32,7 @@ app.add_middleware(
 app.include_router(health_router)
 
 # Include GraphQL endpoint
-graphql_app = GraphQLRouter(schema)
+graphql_app = GraphQLRouter(schema, graphiql=True)
 app.include_router(graphql_app, prefix="/graphql")
 
 if __name__ == "__main__":
