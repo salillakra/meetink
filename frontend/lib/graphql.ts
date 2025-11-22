@@ -1,5 +1,9 @@
 export async function graphqlRequest(query: string, variables?: Record<string, unknown>) {
-  const GRAPHQL_URL = process.env.GRAPHQL_URL || "http://localhost:8000/graphql";
+  const GRAPHQL_URL = process.env.NEXT_PUBLIC_GRAPHQL_URL ;
+
+  if (!GRAPHQL_URL) {
+    throw new Error("GRAPHQL_URL is not defined in environment variables");
+  }
 
   const res = await fetch(GRAPHQL_URL, {
     method: "POST",

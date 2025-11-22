@@ -29,6 +29,17 @@ class Query:
             confession.comments = comments
 
         return [ConfessionType.from_model(c) for c in confessions]
+    
+    @strawberry.field
+    async def confessions_by_category(self, category: str) -> List[ConfessionType]:
+        confessions = await Confession.find(Confession.category == category).to_list()
+
+        # Fetch comments for each confession
+        for confession in confessions:
+            comments = await Comment.find(Comment.confessionId == confession.id).to_list()
+            confession.comments = comments
+
+        return [ConfessionType.from_model(c) for c in confessions]
 
     @strawberry.field
     async def confession(self, confession_id: str) -> Optional[ConfessionType]:

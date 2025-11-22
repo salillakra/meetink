@@ -79,7 +79,7 @@ export default function ConfessionsClient({
       `;
 
       const data = await graphqlRequest(query);
-      return (data.confessions || []).map((c: any) => ({
+      return (data.confessions || []).map((c: Confession) => ({
         id: c.id,
         content: c.content,
         category: c.category,
@@ -88,7 +88,7 @@ export default function ConfessionsClient({
         anonymousName: c.anonymousName,
         avatarSeed: c.avatarSeed,
         createdAt: new Date(c.createdAt).toISOString(),
-        comments: (c.comments || []).map((cm: any) => ({
+        comments: (c.comments || []).map((cm: Comment) => ({
           id: cm.id,
           content: cm.content,
           gender: cm.gender,
