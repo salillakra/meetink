@@ -243,8 +243,8 @@ export default function CommentsModal({
             {/* Original Confession */}
             <div className="p-6 border-b border-purple-500/10 bg-gradient-to-br from-purple-500/5 to-transparent">
               <div className="flex gap-4">
-                <div className="relative shrink-0">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-75 blur-md"></div>
+                <div className="relative h-18">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-75 blur-md"></div>
                   <Image
                     height={50}
                     width={50}
@@ -261,7 +261,7 @@ export default function CommentsModal({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <p className="text-base font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                    <p className="text-base font-bold bg-linear-to-r from-white to-purple-200 bg-clip-text text-transparent">
                       {confession.anonymousName}
                     </p>
                     <span className="text-sm">
@@ -274,7 +274,7 @@ export default function CommentsModal({
                     {confession.category && (
                       <>
                         <span className="text-xs text-gray-600">•</span>
-                        <span className="px-2.5 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-full text-xs font-bold text-purple-200 flex items-center gap-1.5 shadow-lg">
+                        <span className="px-2.5 py-1 bg-linear-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-full text-xs font-bold text-purple-200 flex items-center gap-1.5 shadow-lg">
                           <span>{getCategoryEmoji(confession.category)}</span>
                           {confession.category}
                         </span>
