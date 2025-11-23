@@ -139,15 +139,15 @@ export default function ConfessionCard({
 
   return (
     <div
-      className={`group relative bg-linear-to-br ${getCategoryColor(
+      className={`group relative bg-gradient-to-br ${getCategoryColor(
         confession.category
       )} backdrop-blur-xl border rounded-2xl p-6 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:scale-[1.02] overflow-hidden`}
     >
-      {/* Animated linear overlay */}
-      <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      {/* Animated gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
       {/* Subtle shine effect */}
-      <div className="absolute -inset-1 bg-linear-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-all duration-700 group-hover:translate-x-full pointer-events-none" />
+      <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-all duration-700 group-hover:translate-x-full pointer-events-none" />
 
       <div className="relative z-10">
         {/* Header */}
@@ -181,14 +181,20 @@ export default function ConfessionCard({
               alt={confession.anonymousName}
               className="w-12 h-12 rounded-full border-2 border-purple-500/40 shadow-lg shadow-purple-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:border-purple-400/60"
             />
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-linear-to-br from-purple-500 to-pink-500 rounded-full border-2 border-black/50 shadow-lg" />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full border-2 border-black/50 shadow-lg" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold truncate bg-linear-to-r from-white to-purple-200 bg-clip-text text-transparent">
+            <p className="text-sm font-bold truncate bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
               {confession.anonymousName}
             </p>
             <p className="text-xs text-gray-400 flex items-center gap-1.5">
-              <span>{confession.gender === "male" ? "👨" : "👩"}</span>
+              <span>
+                {confession.gender === "male"
+                  ? "He/Him"
+                  : confession.gender === "female"
+                  ? "She/Her"
+                  : "They/Them"}
+              </span>
               <span className="text-gray-500">•</span>
               <span>Anonymous</span>
             </p>
@@ -203,8 +209,8 @@ export default function ConfessionCard({
               disabled={hasLiked}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg ${
                 hasLiked
-                  ? "bg-linear-to-r from-pink-500/40 to-rose-500/40 text-pink-300 border-2 border-pink-400/60 shadow-pink-500/30"
-                  : "bg-black/40 text-gray-400 border-2 border-white/10 hover:bg-linear-to-r hover:from-pink-500/30 hover:to-rose-500/30 hover:text-pink-300 hover:border-pink-400/50 hover:shadow-pink-500/20 hover:scale-105 active:scale-100"
+                  ? "bg-gradient-to-r from-pink-500/40 to-rose-500/40 text-pink-300 border-2 border-pink-400/60 shadow-pink-500/30"
+                  : "bg-black/40 text-gray-400 border-2 border-white/10 hover:bg-gradient-to-r hover:from-pink-500/30 hover:to-rose-500/30 hover:text-pink-300 hover:border-pink-400/50 hover:shadow-pink-500/20 hover:scale-105 active:scale-100"
               }`}
             >
               <Heart
@@ -217,7 +223,7 @@ export default function ConfessionCard({
 
             <button
               onClick={() => setShowCommentsModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg border-2 bg-black/40 text-gray-400 border-white/10 hover:bg-linear-to-r hover:from-blue-500/30 hover:to-cyan-500/30 hover:text-blue-300 hover:border-blue-400/50 hover:shadow-blue-500/20 hover:scale-105 active:scale-100"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg border-2 bg-black/40 text-gray-400 border-white/10 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-cyan-500/30 hover:text-blue-300 hover:border-blue-400/50 hover:shadow-blue-500/20 hover:scale-105 active:scale-100"
             >
               <MessageCircle className="w-4 h-4 transition-all duration-300" />
               <span className="text-sm font-bold">
