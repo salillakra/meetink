@@ -1,23 +1,12 @@
 "use client";
 
-import { Heart, Clock, MessageCircle, Send, Loader2 } from "lucide-react";
+import { Heart, Clock, MessageCircle } from "lucide-react";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  generateAvatarUrl,
-  generateAnonymousName,
-  getRandomSeed,
-} from "@/lib/anonymousUtils";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useMutation } from "@tanstack/react-query";
+import { generateAvatarUrl } from "@/lib/anonymousUtils";
 import { graphqlRequest } from "@/lib/graphql";
+import CommentsModal from "./CommentsModal";
+import Image from "next/image";
 
 interface Comment {
   id: string;
@@ -52,10 +41,7 @@ export default function ConfessionCard({
   const [likes, setLikes] = useState(confession.likes);
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
-  const [showComments, setShowComments] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const [commentGender, setCommentGender] = useState("male");
-  const queryClient = useQueryClient();
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -82,73 +68,6 @@ export default function ConfessionCard({
     },
   });
 
-  const commentMutation = useMutation({
-    mutationFn: async (data: { content: string; gender: string }) => {
-      const avatarSeed = getRandomSeed();
-      const anonymousName = generateAnonymousName(avatarSeed);
-
-      const mutation = `
-        mutation CreateComment(
-          $confessionId: String!,
-          $content: String!,
-          $gender: String!,
-          $anonymousName: String!,
-          $avatarSeed: Int!
-        ) {
-          createComment(
-            confessionId: $confessionId,
-            content: $content,
-            gender: $gender,
-            anonymousName: $anonymousName,
-            avatarSeed: $avatarSeed
-          ) {
-            id
-            content
-            gender
-            anonymous_name
-            avatar_seed
-            created_at
-          }
-        }
-      `;
-
-      const result = await graphqlRequest(mutation, {
-        confessionId: confession.id,
-        content: data.content,
-        gender: data.gender,
-        anonymousName,
-        avatarSeed,
-      });
-
-      const comment = result.createComment;
-      return {
-        id: comment.id,
-        content: comment.content,
-        gender: comment.gender,
-        anonymousName: comment.anonymous_name,
-        avatarSeed: comment.avatar_seed,
-        createdAt: new Date(comment.created_at).toISOString(),
-      };
-    },
-    onSuccess: (newComment) => {
-      setCommentText("");
-      setCommentGender("male");
-
-      // If parent provided a handler, call it so parent can update its local state immediately
-      if (onCommentAdded && typeof onCommentAdded === "function") {
-        try {
-          onCommentAdded(confession.id, newComment as Comment);
-          return;
-        } catch (e) {
-          // Fall back to invalidating queries if callback fails
-        }
-      }
-
-      // Fallback: invalidate queries so other approaches still update
-      queryClient.invalidateQueries({ queryKey: ["confessions"] });
-    },
-  });
-
   const handleLike = () => {
     if (!hasLiked && !isLiking) {
       // Optimistic update - instant feedback
@@ -158,16 +77,6 @@ export default function ConfessionCard({
 
       // API call in background
       likeMutation.mutate();
-    }
-  };
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (commentText.trim()) {
-      commentMutation.mutate({
-        content: commentText.trim(),
-        gender: commentGender,
-      });
     }
   };
 
@@ -230,177 +139,103 @@ export default function ConfessionCard({
 
   return (
     <div
-      className={`bg-linear-to-br ${getCategoryColor(
+      className={`group relative bg-linear-to-br ${getCategoryColor(
         confession.category
-      )} backdrop-blur-md border rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1`}
+      )} backdrop-blur-xl border rounded-2xl p-6 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:scale-[1.02] overflow-hidden`}
     >
-      {/* Header */}
-      <div className="flex flex-wrap justify-between items-start gap-2 mb-3 sm:mb-4">
-        {confession.category && (
-          <span className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-black/50 backdrop-blur-sm rounded-full text-[10px] sm:text-xs font-semibold text-white border border-white/20 shadow-sm">
-            <span>{getCategoryEmoji(confession.category)}</span>
-            {confession.category}
-          </span>
-        )}
-        <div className="flex items-center gap-1 sm:gap-2 text-gray-400 text-[10px] sm:text-xs font-medium">
-          <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-          <span>{formatDate(confession.createdAt)}</span>
-        </div>
-      </div>
+      {/* Animated linear overlay */}
+      <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-      {/* Content */}
-      <p className="text-white text-sm sm:text-base leading-relaxed mb-4 sm:mb-6 min-h-[60px]">
-        {confession.content}
-      </p>
+      {/* Subtle shine effect */}
+      <div className="absolute -inset-1 bg-linear-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-all duration-700 group-hover:translate-x-full pointer-events-none" />
 
-      {/* Author Info */}
-      <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-white/10">
-        <img
-          src={generateAvatarUrl(confession.gender, confession.avatarSeed)}
-          alt={confession.anonymousName}
-          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-purple-500/30 shrink-0"
-        />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm font-semibold text-white truncate">
-            {confession.anonymousName}
-          </p>
-          <p className="text-[10px] sm:text-xs text-gray-400">
-            {confession.gender === "male" ? " Male" : " Female"} • Anonymous
-          </p>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleLike}
-            disabled={hasLiked}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all duration-200 font-medium ${
-              hasLiked
-                ? "bg-pink-500/30 text-pink-400 border border-pink-500/50 shadow-lg shadow-pink-500/20"
-                : "bg-black/30 text-gray-400 border border-white/10 hover:bg-pink-500/20 hover:text-pink-400 hover:border-pink-500/30 hover:scale-105 active:scale-95"
-            }`}
-          >
-            <Heart
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
-                hasLiked ? "fill-current" : ""
-              } transition-all duration-200`}
-            />
-            <span className="text-xs sm:text-sm font-semibold">{likes}</span>
-          </button>
-
-          <button
-            onClick={() => setShowComments(!showComments)}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all duration-300 font-medium bg-black/30 text-gray-400 border border-white/10 hover:bg-blue-500/20 hover:text-blue-400 hover:border-blue-500/30 hover:scale-105 active:scale-95"
-          >
-            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm font-semibold">
-              {confession.comments.length}
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="flex justify-between items-start gap-3 mb-4">
+          {confession.category && (
+            <span className="flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-xs font-bold text-white border border-white/20 shadow-lg shadow-black/20">
+              <span className="text-base">
+                {getCategoryEmoji(confession.category)}
+              </span>
+              <span className="tracking-wide">{confession.category}</span>
             </span>
-          </button>
-        </div>
-      </div>
-
-      {/* Comments Section */}
-      {showComments && (
-        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 animate-in fade-in slide-in-from-top-2 duration-300">
-          {/* Comment Form */}
-          <form
-            onSubmit={handleCommentSubmit}
-            className="mb-3 sm:mb-4 space-y-2.5"
-          >
-            <div>
-              <Select value={commentGender} onValueChange={setCommentGender}>
-                <SelectTrigger className="w-full sm:w-[140px] h-8 sm:h-9 bg-black/50 border-purple-500/30 text-white text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-black/95 backdrop-blur-xl border-purple-500/30">
-                  <SelectItem value="male" className="text-white text-xs">
-                    👨 Male
-                  </SelectItem>
-                  <SelectItem value="female" className="text-white text-xs">
-                    👩 Female
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Add a comment..."
-                rows={3}
-                maxLength={500}
-                className="w-full bg-black/50 border-purple-500/30 text-white text-xs sm:text-sm placeholder-gray-500 resize-none rounded-lg focus:ring-2 focus:ring-purple-500/50"
-              />
-              <div className="flex items-center justify-between mt-1.5">
-                <p className="text-[9px] sm:text-[10px] text-gray-500">
-                  {commentText.length}/500
-                </p>
-              </div>
-            </div>
-            <Button
-              type="submit"
-              disabled={!commentText.trim() || commentMutation.isPending}
-              className="w-full h-9 sm:h-10 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {commentMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 animate-spin mr-2" />
-                  <span className="text-xs sm:text-sm">Posting...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4 sm:w-4.5 sm:h-4.5 mr-2" />
-                  <span className="text-xs sm:text-sm">Post Comment</span>
-                </>
-              )}
-            </Button>
-          </form>
-
-          {/* Comments List */}
-          {confession.comments.length > 0 ? (
-            <div className="space-y-2 sm:space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent">
-              {confession.comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="flex gap-2 p-2.5 sm:p-3 bg-black/30 rounded-lg border border-white/5 animate-in fade-in slide-in-from-left-2 duration-200"
-                >
-                  <img
-                    src={generateAvatarUrl(comment.gender, comment.avatarSeed)}
-                    alt={comment.anonymousName}
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-purple-500/30 shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
-                      <p className="text-[11px] sm:text-xs font-semibold text-white">
-                        {comment.anonymousName}
-                      </p>
-                      <span className="text-[9px] sm:text-[10px] text-gray-500">
-                        {comment.gender === "male" ? "👨" : "👩"}
-                      </span>
-                      <span className="text-[9px] sm:text-[10px] text-gray-500">
-                        •
-                      </span>
-                      <span className="text-[9px] sm:text-[10px] text-gray-500">
-                        {formatDate(comment.createdAt)}
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-gray-300 wrap-break-word">
-                      {comment.content}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500 text-xs sm:text-sm py-3 sm:py-4">
-              No comments yet. Be the first to comment!
-            </p>
           )}
+          <div className="flex items-center gap-2 text-gray-400 text-xs font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
+            <Clock className="w-3.5 h-3.5" />
+            <span>{formatDate(confession.createdAt)}</span>
+          </div>
         </div>
-      )}
+
+        {/* Content */}
+        <p className="text-white text-base leading-relaxed mb-6 min-h-20 font-medium">
+          {confession.content}
+        </p>
+
+        {/* Author Info */}
+        <div className="flex items-center gap-3 mb-5 pb-5 border-b border-white/10">
+          <div className="relative">
+            <Image
+              height={50}
+              width={50}
+              src={generateAvatarUrl(confession.gender, confession.avatarSeed)}
+              alt={confession.anonymousName}
+              className="w-12 h-12 rounded-full border-2 border-purple-500/40 shadow-lg shadow-purple-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:border-purple-400/60"
+            />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-linear-to-br from-purple-500 to-pink-500 rounded-full border-2 border-black/50 shadow-lg" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold truncate bg-linear-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              {confession.anonymousName}
+            </p>
+            <p className="text-xs text-gray-400 flex items-center gap-1.5">
+              <span>{confession.gender === "male" ? "👨" : "👩"}</span>
+              <span className="text-gray-500">•</span>
+              <span>Anonymous</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleLike}
+              disabled={hasLiked}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg ${
+                hasLiked
+                  ? "bg-linear-to-r from-pink-500/40 to-rose-500/40 text-pink-300 border-2 border-pink-400/60 shadow-pink-500/30"
+                  : "bg-black/40 text-gray-400 border-2 border-white/10 hover:bg-linear-to-r hover:from-pink-500/30 hover:to-rose-500/30 hover:text-pink-300 hover:border-pink-400/50 hover:shadow-pink-500/20 hover:scale-105 active:scale-100"
+              }`}
+            >
+              <Heart
+                className={`w-4 h-4 ${
+                  hasLiked ? "fill-current" : ""
+                } transition-all duration-300`}
+              />
+              <span className="text-sm font-bold">{likes}</span>
+            </button>
+
+            <button
+              onClick={() => setShowCommentsModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg border-2 bg-black/40 text-gray-400 border-white/10 hover:bg-linear-to-r hover:from-blue-500/30 hover:to-cyan-500/30 hover:text-blue-300 hover:border-blue-400/50 hover:shadow-blue-500/20 hover:scale-105 active:scale-100"
+            >
+              <MessageCircle className="w-4 h-4 transition-all duration-300" />
+              <span className="text-sm font-bold">
+                {confession.comments.length}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Comments Modal */}
+        <CommentsModal
+          confession={{ ...confession, likes }}
+          isOpen={showCommentsModal}
+          onClose={() => setShowCommentsModal(false)}
+          onCommentAdded={onCommentAdded}
+          onLikeUpdate={(_, newLikes) => setLikes(newLikes)}
+        />
+      </div>
     </div>
   );
 }
