@@ -28,13 +28,9 @@ interface Confession {
   comments: Comment[];
 }
 
-interface ConfessionsClientProps {
-  confessions: Confession[];
-}
 
 export default function ConfessionsClient({
-  confessions: initialConfessions,
-}: ConfessionsClientProps) {
+}) {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const categories = [
@@ -98,8 +94,6 @@ export default function ConfessionsClient({
         })),
       })) as Confession[];
     },
-    initialData: selectedCategory === "all" ? initialConfessions : undefined,
-    staleTime: 0, // Always fetch fresh data
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
