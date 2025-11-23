@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { generateAvatarUrl } from "@/lib/anonymousUtils";
 import { graphqlRequest } from "@/lib/graphql";
-import CommentsModal from "./CommentsModal";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Comment {
   id: string;
@@ -41,7 +41,6 @@ export default function ConfessionCard({
   const [likes, setLikes] = useState(confession.likes);
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
-  const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -141,14 +140,9 @@ export default function ConfessionCard({
     <div
       className={`group relative bg-gradient-to-br ${getCategoryColor(
         confession.category
-      )} backdrop-blur-xl border rounded-2xl p-6 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:scale-[1.02] overflow-hidden`}
+      )} backdrop-blur-xl border rounded-2xl p-6 shadow-xl transition-transform duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1 overflow-hidden will-change-transform`}
+      style={{ transform: "translate3d(0, 0, 0)" }}
     >
-      {/* Animated gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-      {/* Subtle shine effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-all duration-700 group-hover:translate-x-full pointer-events-none" />
-
       <div className="relative z-10">
         {/* Header */}
         <div className="flex justify-between items-start gap-3 mb-4">
@@ -221,26 +215,17 @@ export default function ConfessionCard({
               <span className="text-sm font-bold">{likes}</span>
             </button>
 
-            <button
-              onClick={() => setShowCommentsModal(true)}
+            <Link
+              href={`/confessions/${confession.id}`}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg border-2 bg-black/40 text-gray-400 border-white/10 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-cyan-500/30 hover:text-blue-300 hover:border-blue-400/50 hover:shadow-blue-500/20 hover:scale-105 active:scale-100"
             >
               <MessageCircle className="w-4 h-4 transition-all duration-300" />
               <span className="text-sm font-bold">
                 {confession.comments.length}
               </span>
-            </button>
+            </Link>
           </div>
         </div>
-
-        {/* Comments Modal */}
-        <CommentsModal
-          confession={{ ...confession, likes }}
-          isOpen={showCommentsModal}
-          onClose={() => setShowCommentsModal(false)}
-          onCommentAdded={onCommentAdded}
-          onLikeUpdate={(_, newLikes) => setLikes(newLikes)}
-        />
       </div>
     </div>
   );
