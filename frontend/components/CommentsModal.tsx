@@ -143,8 +143,11 @@ export default function CommentsModal({
       if (onCommentAdded && typeof onCommentAdded === "function") {
         try {
           onCommentAdded(confession.id, newComment);
-        } catch (e) {
-          // Fallback
+        } catch (error) {
+          console.error("Error in onCommentAdded callback:", error);
+          alert(
+            "An error occurred while adding your comment. Please try again."
+          );
         }
       }
 
@@ -238,10 +241,10 @@ export default function CommentsModal({
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/60 scrollbar-track-transparent">
             {/* Original Confession */}
-            <div className="p-6 border-b border-purple-500/10 bg-linear-to-br from-purple-500/5 to-transparent">
+            <div className="p-6 border-b border-purple-500/10 bg-gradient-to-br from-purple-500/5 to-transparent">
               <div className="flex gap-4">
                 <div className="relative shrink-0">
-                  <div className="absolute -inset-1 bg-linear-to-r from-purple-500 to-pink-500 rounded-full opacity-75 blur-md"></div>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-75 blur-md"></div>
                   <Image
                     height={50}
                     width={50}
@@ -252,7 +255,7 @@ export default function CommentsModal({
                     alt={confession.anonymousName}
                     className="relative w-14 h-14 rounded-full border-2 border-purple-400/50 shadow-xl"
                   />
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-linear-to-br from-purple-500 to-pink-500 rounded-full border-2 border-black shadow-lg flex items-center justify-center">
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full border-2 border-black shadow-lg flex items-center justify-center">
                     <span className="text-[10px]">✨</span>
                   </div>
                 </div>
@@ -317,7 +320,11 @@ export default function CommentsModal({
               <div className="flex gap-4">
                 <div className="shrink-0">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 border-2 border-purple-400/40 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/20">
-                    {commentGender === "male" ? "👨" : "👩"}
+                    {commentGender === "male"
+                      ? "👨"
+                      : commentGender === "female"
+                      ? "👩"
+                      : "🧑"}
                   </div>
                 </div>
                 <div className="flex-1 space-y-3">
@@ -333,13 +340,19 @@ export default function CommentsModal({
                         value="male"
                         className="text-white text-sm font-medium"
                       >
-                        👨 Male
+                        Male
                       </SelectItem>
                       <SelectItem
                         value="female"
                         className="text-white text-sm font-medium"
                       >
-                        👩 Female
+                        Female
+                      </SelectItem>
+                      <SelectItem
+                        value="others"
+                        className="text-white text-sm font-medium"
+                      >
+                        Others
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -415,7 +428,11 @@ export default function CommentsModal({
                             {comment.anonymousName}
                           </p>
                           <span className="text-xs text-gray-500">
-                            {comment.gender === "male" ? "👨" : "👩"}
+                            {confession.gender === "male"
+                              ? "He/Him"
+                              : confession.gender === "female"
+                              ? "She/Her"
+                              : "They/Them"}
                           </span>
                           <span className="text-xs text-gray-600">•</span>
                           <span className="text-xs text-gray-500 font-medium">
