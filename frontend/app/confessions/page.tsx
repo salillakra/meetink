@@ -1,104 +1,8 @@
 import { Sparkles, ArrowLeft, GraduationCap } from "lucide-react";
 import Link from "next/link";
-import { graphqlRequest } from "@/lib/graphql";
 import ConfessionsClient from "../../components/ConfessionsClient";
 
-// Force dynamic rendering and disable caching
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-interface Comment {
-  id: string;
-  content: string;
-  gender: string;
-  anonymousName: string;
-  avatarSeed: number;
-  createdAt: string;
-}
-
-interface Confession {
-  id: string;
-  content: string;
-  category: string | null;
-  likes: number;
-  gender: string;
-  anonymousName: string;
-  avatarSeed: number;
-  createdAt: string;
-  comments: Comment[];
-}
-
-interface GQLComment {
-  id: string;
-  content: string;
-  gender: string;
-  anonymousName: string;
-  avatarSeed: number;
-  createdAt: string;
-}
-
-interface GQLConfession {
-  id: string;
-  content: string;
-  category: string | null;
-  likes: number;
-  gender: string;
-  anonymousName: string;
-  avatarSeed: number;
-  createdAt: string;
-  comments: GQLComment[];
-}
-
-async function getConfessions(): Promise<Confession[]> {
-  const query = `
-    query Confessions {
-      confessions {
-        id
-        content
-        category
-        likes
-        gender
-        anonymousName
-        avatarSeed
-        createdAt
-        comments {
-          id
-          content
-          gender
-          anonymousName
-          avatarSeed
-          createdAt
-        }
-      }
-    }
-  `;
-
-  const data = await graphqlRequest(query);
-  const confessions = (data.confessions || []) as GQLConfession[];
-
-  return confessions.map((c: GQLConfession) => ({
-    id: c.id,
-    content: c.content,
-    category: c.category,
-    likes: c.likes,
-    gender: c.gender,
-    anonymousName: c.anonymousName,
-    avatarSeed: c.avatarSeed,
-    createdAt: new Date(c.createdAt).toISOString(),
-    comments: (c.comments || []).map((cm: GQLComment) => ({
-      id: cm.id,
-      content: cm.content,
-      gender: cm.gender,
-      anonymousName: cm.anonymousName,
-      avatarSeed: cm.avatarSeed,
-      createdAt: new Date(cm.createdAt).toISOString(),
-    })),
-  }));
-}
-
-export default async function ConfessionsPage() {
-  const confessions = await getConfessions();
-
+export default function ConfessionsPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-black grain">
       {/* Animated background blobs with CSS animations */}
@@ -148,9 +52,7 @@ export default async function ConfessionsPage() {
             confessions are completely anonymous.
           </p>
         </div>
-
-        {/* Client-side interactive components */}
-        <ConfessionsClient confessions={confessions} />
+        <ConfessionsClient />
       </div>
     </main>
   );
