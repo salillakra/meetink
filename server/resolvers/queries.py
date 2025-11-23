@@ -32,7 +32,12 @@ class Query:
     
     @strawberry.field
     async def confessions_by_category(self, category: str) -> List[ConfessionType]:
-        confessions = await Confession.find(Confession.category == category).to_list()
+                
+        if (category == "all"):
+            confessions = await Confession.find_all().to_list()
+        else:
+            confessions = await Confession.find(Confession.category == category).to_list()
+
 
         # Fetch comments for each confession
         for confession in confessions:
