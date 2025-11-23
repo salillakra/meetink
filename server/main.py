@@ -31,7 +31,7 @@ app.add_middleware(
 app.include_router(health_router)
 
 # Include GraphQL endpoint
-graphql_app = GraphQLRouter(schema, graphiql=True)
+graphql_app = GraphQLRouter(schema, graphiql_ide=True)
 app.include_router(graphql_app, prefix="/graphql")
 
 if __name__ == "__main__":
