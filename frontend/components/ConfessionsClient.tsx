@@ -57,7 +57,7 @@ export default function ConfessionsClient({
     queryFn: async () => {
       const query = `
         query Confessions {
-          confessions {
+          confessionsByCategory(category: "${selectedCategory}") {
             id
             content
             category
@@ -79,7 +79,7 @@ export default function ConfessionsClient({
       `;
 
       const data = await graphqlRequest(query);
-      return (data.confessions || []).map((c: Confession) => ({
+      return (data.confessionsByCategory || []).map((c: Confession) => ({
         id: c.id,
         content: c.content,
         category: c.category,
