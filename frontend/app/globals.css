@@ -120,6 +120,75 @@ body {
   padding: 0;
 }
 
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  /* GPU acceleration for cards */
+  .group {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+
+  /* Optimize animations for mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Reduce motion for better performance on mobile */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Optimize scrolling containers */
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Containment for better rendering performance */
+  .group {
+    contain: layout style paint;
+  }
+}
+
+/* Optimize images for better performance */
+img {
+  content-visibility: auto;
+}
+
+/* Better GPU acceleration for transforms */
+.will-change-transform {
+  will-change: transform;
+}
+
+/* Optimize backdrop-blur on mobile */
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl {
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+  }
+
+  @media (max-width: 768px) {
+    .backdrop-blur-xl,
+    .backdrop-blur-2xl {
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+  }
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
