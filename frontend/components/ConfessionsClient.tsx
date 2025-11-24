@@ -7,15 +7,6 @@ import ConfessionForm from "@/components/ConfessionForm";
 import ConfessionCard from "@/components/ConfessionCard";
 import { graphqlRequest } from "@/lib/graphql";
 
-interface Comment {
-  id: string;
-  content: string;
-  gender: string;
-  anonymousName: string;
-  avatarSeed: number;
-  createdAt: string;
-}
-
 interface Confession {
   id: string;
   content: string;
@@ -25,12 +16,10 @@ interface Confession {
   anonymousName: string;
   avatarSeed: number;
   createdAt: string;
-  comments: Comment[];
+  commentsCount: number;
 }
 
-
-export default function ConfessionsClient({
-}) {
+export default function ConfessionsClient({}) {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const categories = [
@@ -62,14 +51,7 @@ export default function ConfessionsClient({
             anonymousName
             avatarSeed
             createdAt
-            comments {
-              id
-              content
-              gender
-              anonymousName
-              avatarSeed
-              createdAt
-            }
+            commentsCount
           }
         }
       `;
@@ -84,14 +66,7 @@ export default function ConfessionsClient({
         anonymousName: c.anonymousName,
         avatarSeed: c.avatarSeed,
         createdAt: new Date(c.createdAt).toISOString(),
-        comments: (c.comments || []).map((cm: Comment) => ({
-          id: cm.id,
-          content: cm.content,
-          gender: cm.gender,
-          anonymousName: cm.anonymousName,
-          avatarSeed: cm.avatarSeed,
-          createdAt: new Date(cm.createdAt).toISOString(),
-        })),
+        commentsCount: c.commentsCount,
       })) as Confession[];
     },
     refetchOnMount: true,

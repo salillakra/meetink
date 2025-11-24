@@ -8,15 +8,6 @@ import { graphqlRequest } from "@/lib/graphql";
 import Image from "next/image";
 import Link from "next/link";
 
-interface Comment {
-  id: string;
-  content: string;
-  gender: string;
-  anonymousName: string;
-  avatarSeed: number;
-  createdAt: string;
-}
-
 interface Confession {
   id: string;
   content: string;
@@ -26,12 +17,12 @@ interface Confession {
   anonymousName: string;
   avatarSeed: number;
   createdAt: string;
-  comments: Comment[];
+  commentsCount: number;
 }
 
 interface ConfessionCardProps {
   confession: Confession;
-  onCommentAdded?: (confessionId: string, comment: Comment) => void;
+  onCommentAdded?: (confessionId: string) => void;
 }
 
 export default function ConfessionCard({
@@ -221,7 +212,7 @@ export default function ConfessionCard({
             >
               <MessageCircle className="w-4 h-4 transition-all duration-300" />
               <span className="text-sm font-bold">
-                {confession.comments.length}
+                {confession.commentsCount}
               </span>
             </Link>
           </div>
