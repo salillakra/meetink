@@ -38,35 +38,40 @@ echo "📦 Starting Python GraphQL Server (port 8000)..."
         cp .env.example .env
     fi
 
-    # Run Python server in background
-    python main.py > ../server.log 2>&1 &
-    echo $! > ../server.pid
-) &
+    # Run Python server
+    python main.py
+) > server.log 2>&1 &
 
-sleep 3  # Give server time to start
-SERVER_PID=$(cat server.pid 2>/dev/null || echo "")
+SERVER_PID=$!
+echo $SERVER_PID > server.pid
 
 echo "✅ GraphQL Server started (PID: $SERVER_PID)"
 echo ""
 
-# Start Next.js frontend
+sleep 2  # Give server time to start
+
+# Start Next.js frontend in background
 echo "⚛️  Starting Next.js Frontend (port 3000)..."
-cd frontend
+(
+    cd frontend
 
-# Check if node_modules exists
-if [ ! -d "node_modules" ]; then
-    echo "Installing npm dependencies..."
-    npm install
-fi
+    # Check if node_modules exists
+    if [ ! -d "node_modules" ]; then
+        echo "Installing npm dependencies..."
+        npm install
+    fi
 
-# Check if .env.local exists
-if [ ! -f ".env.local" ]; then
-    echo "⚠️  No .env.local file found in frontend/. Copying from .env.example..."
-    cp .env.example .env.local
-fi
+    # Check if .env.local exists
+    if [ ! -f ".env.local" ]; then
+        echo "⚠️  No .env.local file found in frontend/. Copying from .env.example..."
+        cp .env.example .env.local
+    fi
 
-npm run dev &
+    npm run dev
+) > frontend.log 2>&1 &
+
 FRONTEND_PID=$!
+echo $FRONTEND_PID > frontend.pid
 
 echo "✅ Frontend started (PID: $FRONTEND_PID)"
 echo ""
@@ -76,12 +81,14 @@ echo ""
 echo "🌐 Frontend:         http://localhost:3000"
 echo "🔌 GraphQL Server:   http://localhost:8000"
 echo "🔍 GraphQL Explorer: http://localhost:8000/graphql"
+echo ""
+echo "📝 Logs: server.log | frontend.log"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Press Ctrl+C to stop all servers"
 
 # Trap Ctrl+C and kill both processes
-trap "echo ''; echo '🛑 Stopping servers...'; kill $SERVER_PID $FRONTEND_PID 2>/dev/null; rm -f server.pid; exit" INT
+trap "echo ''; echo '🛑 Stopping servers...'; kill $SERVER_PID $FRONTEND_PID 2>/dev/null; rm -f server.pid frontend.pid; exit" INT
 
 # Wait for both processes
 wait
