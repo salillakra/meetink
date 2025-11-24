@@ -23,12 +23,12 @@ class Query:
     async def confessions(self) -> List[ConfessionType]:
         confessions = await Confession.find_all().to_list()
 
-        # Fetch comments for each confession
+        # Fetch only comment counts for efficiency
         for confession in confessions:
-            comments = await Comment.find(Comment.confessionId == confession.id).to_list()
-            confession.comments = comments
+            comments_list = await Comment.find(Comment.confessionId == confession.id).to_list()
+            confession.comments = comments_list
 
-        return [ConfessionType.from_model(c) for c in confessions]
+        return [ConfessionType.from_model(c, include_comments=False) for c in confessions]
     
     @strawberry.field
     async def confessions_by_category(self, category: str) -> List[ConfessionType]:
@@ -39,27 +39,33 @@ class Query:
             confessions = await Confession.find(Confession.category == category).to_list()
 
 
-        # Fetch comments for each confession
+        # Fetch only comment counts for efficiency
         for confession in confessions:
-            comments = await Comment.find(Comment.confessionId == confession.id).to_list()
-            confession.comments = comments
+            comments_list = await Comment.find(Comment.confessionId == confession.id).to_list()
+            confession.comments = comments_list
 
-        return [ConfessionType.from_model(c) for c in confessions]
+        return [ConfessionType.from_model(c, include_comments=False) for c in confessions]
 
     @strawberry.field
     async def confession(self, confession_id: str) -> Optional[ConfessionType]:
         confession = await Confession.get(confession_id)
         if confession:
             # Fetch comments for this confession
-            comments = await Comment.find(Comment.confessionId == confession.id).to_list()
-            confession.comments = comments
-            return ConfessionType.from_model(confession)
+            comments_list = await Comment.find(Comment.confessionId == confession.id).to_list()
+            confession.comments = comments_list
+            return ConfessionType.from_model(confession, include_comments=True)
         return None
+    
+    @strawberry.field
+    async def comments_by_confession(self, confession_id: str) -> List[CommentType]:
+        """Fetch comments for a specific confession - allows lazy loading"""
+        comments_list = await Comment.find(Comment.confessionId == confession_id).to_list()
+        return [CommentType.from_model(c) for c in comments_list]
 
     @strawberry.field
     async def comments(self) -> List[CommentType]:
-        comments = await Comment.find_all().to_list()
-        return [CommentType.from_model(c) for c in comments]
+        comments_list = await Comment.find_all().to_list()
+        return [CommentType.from_model(c) for c in comments_list]
 
     @strawberry.field
     async def comment(self, comment_id: str) -> Optional[CommentType]:
