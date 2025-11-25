@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Hyperspeed from "./Hyperspeed";
+import UserMenu from "./UserMenu";
 
 export default function Hero() {
   const scrollToEarlyAccess = () => {
@@ -15,6 +16,11 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden grain">
+      {/* User menu in top right */}
+      <div className="absolute top-8 right-8 z-20">
+        <UserMenu />
+      </div>
+
       {/* Animated background blobs */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="bg-slate-950/30  absolute inset-0 z-10"></div>

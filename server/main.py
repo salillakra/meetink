@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from strawberry.fastapi import GraphQLRouter
 from contextlib import asynccontextmanager
 from database import init_database
 from schema.schema import schema
 from api import health_router
+import os
 
 
 @asynccontextmanager
@@ -13,6 +15,12 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+# Add Session middleware (required for OAuth)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET_KEY", "your-secret-key-change-in-production")
+)
 
 # Add CORS middleware for frontend
 app.add_middleware(
@@ -31,7 +39,7 @@ app.add_middleware(
 app.include_router(health_router)
 
 # Include GraphQL endpoint
-graphql_app = GraphQLRouter(schema, graphiql=True)
+graphql_app = GraphQLRouter(schema, graphql_ide="graphiql")
 app.include_router(graphql_app, prefix="/graphql")
 
 if __name__ == "__main__":

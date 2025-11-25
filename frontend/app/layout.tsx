@@ -3,6 +3,7 @@ import { DM_Sans, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
 import { ToastProvider } from "@/components/ToastProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 
 // Modern geometric display for headings
 const dmSans = DM_Sans({
@@ -34,9 +35,11 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${plusJakarta.variable} antialiased bg-black text-white`}
       >
-        <QueryProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );
