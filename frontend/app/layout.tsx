@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
 import { ToastProvider } from "@/components/ToastProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 // Modern geometric display for headings
 const dmSans = DM_Sans({
@@ -42,6 +43,7 @@ export default function RootLayout({
         <QueryProvider>
           <ToastProvider>{children}</ToastProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   );
