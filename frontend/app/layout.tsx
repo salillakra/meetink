@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Plus_Jakarta_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
 import { ToastProvider } from "@/components/ToastProvider";
@@ -34,6 +35,10 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${plusJakarta.variable} antialiased bg-black text-white`}
       >
+        <Script
+          src="https://t.contentsquare.net/uxa/e54b15db05013.js"
+          strategy="afterInteractive"
+        />
         <QueryProvider>
           <ToastProvider>{children}</ToastProvider>
         </QueryProvider>
